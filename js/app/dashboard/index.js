@@ -40,6 +40,9 @@ function start() {
     uploaderEndpoint: dashboardEl.dataset.uploaderEndpoint,
     exampleSpreadsheetUrl: dashboardEl.dataset.exampleSpreadsheetUrl,
     jwt: dashboardEl.dataset.jwt,
+    cent: dashboardEl.dataset.cent,
+    username: dashboardEl.dataset.username,
+    namespace: dashboardEl.dataset.namespace,
     nav: dashboardEl.dataset.nav,
   }
 

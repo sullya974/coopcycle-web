@@ -62,6 +62,9 @@ const initialState = {
 
   selectedTasks: [],
   jwt: '',
+  cent: '',
+  namespace: '',
+  username: '',
   positions: [],
   offline: [],
   taskModalIsOpen: false,
