@@ -3,6 +3,7 @@ import { render } from 'react-dom'
 import { I18nextProvider } from 'react-i18next'
 import NotificationList from './NotificationList'
 import i18n from '../i18n'
+import Centrifuge from 'centrifuge'
 
 function bootstrap($popover, options) {
 
@@ -38,16 +39,8 @@ function bootstrap($popover, options) {
     })
   }
 
-  const hostname = `//${window.location.hostname}`
-                 + (window.location.port ? `:${window.location.port}` : '')
-
-  const socket = io(hostname, {
-    path: '/tracking/socket.io',
-    query: {
-      token: options.jwt,
-    },
-    transports: [ 'websocket' ],
-  })
+  const centrifuge = new Centrifuge(`ws://${window.location.hostname}/centrifugo/connection/websocket`)
+  centrifuge.setToken(options.cent)
 
   $.getJSON(options.notificationsURL, { format: 'json' })
   .then(result => {
@@ -68,23 +61,43 @@ function bootstrap($popover, options) {
 
         initPopover()
 
-        socket.on(`notifications`, notification => notificationsListRef.current.unshift(notification))
-        socket.on(`notifications:count`, count => options.elements.count.innerHTML = count)
+        centrifuge.subscribe(`${options.namespace}_events#${options.username}`, message => {
+
+          const { event } = message.data
+
+          switch (event.name) {
+            case 'notifications':
+              notificationsListRef.current.unshift(event.data)
+              break
+            case 'notifications:count':
+              options.elements.count.innerHTML = event.data
+              break
+          }
+
+        })
+        centrifuge.connect()
+
       }
     )
   })
   .catch(() => { /* Fail silently */ })
 }
 
-$.getJSON(window.Routing.generate('profile_jwt'))
-  .then(result => {
-    const options = {
-      notificationsURL: window.Routing.generate('profile_notifications'),
-      markAsReadURL: window.Routing.generate('profile_notifications_mark_as_read'),
-      jwt: result.jwt,
-      elements: {
-        count: document.querySelector('#notifications .badge')
-      },
-    }
-    bootstrap($('#notifications'), options)
-  })
+const $notifications = $('#notifications')
+
+if ($notifications.length > 0) {
+  $.getJSON(window.Routing.generate('profile_jwt'))
+    .then(result => {
+      const options = {
+        notificationsURL: window.Routing.generate('profile_notifications'),
+        markAsReadURL: window.Routing.generate('profile_notifications_mark_as_read'),
+        cent: result.cent,
+        namespace: result.namespace,
+        username: result.username,
+        elements: {
+          count: document.querySelector('#notifications .badge')
+        },
+      }
+      bootstrap($notifications, options)
+    })
+}
