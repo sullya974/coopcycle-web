@@ -1,0 +1,13 @@
+{
+  "v3_use_offset": true,
+  "admin_password": "centrifugo",
+  "admin_secret": "centrifugo",
+  "namespaces": [
+    {
+      "name": "coopcycle",
+      "history_size": 10,
+      "history_lifetime": 300,
+      "history_recover": true
+    }
+  ]
+}

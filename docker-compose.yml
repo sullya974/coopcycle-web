@@ -97,6 +97,7 @@ services:
     depends_on:
       - php
       - nodejs
+      - centrifugo
     ports:
       - '80:80'
     volumes:
@@ -185,6 +186,17 @@ services:
       - VROOM_ROUTER=osrm  # router to use, osrm or ors
     depends_on:
       - osrm
+
+  centrifugo:
+    image: centrifugo/centrifugo
+    ports:
+      - "8100:8000"
+    volumes:
+      - ./centrifugo:/centrifugo
+    command: centrifugo -c config.json --admin
+    environment:
+      - CENTRIFUGO_TOKEN_HMAC_SECRET_KEY
+      - CENTRIFUGO_API_KEY
 
 volumes:
   node_modules:
